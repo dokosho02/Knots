@@ -9,7 +9,8 @@ import 'package:frb_code/src/rust/frb_generated.dart';
 import 'package:frb_code/models/rss_provider.dart';
 
 import 'package:frb_code/ui/home_screen.dart';
-import 'package:frb_code/tools/utils.dart';
+import 'package:frb_code/tools/folder_permission.dart';
+import 'package:frb_code/tools/fonts_tools.dart';
 
 void main() async {
   // 设置日志记录器
@@ -24,6 +25,7 @@ void main() async {
   
   WidgetsFlutterBinding.ensureInitialized();
 
+  await loadFonts();
   adjustWindow();
 
   await RustLib.init();

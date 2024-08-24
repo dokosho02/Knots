@@ -14,7 +14,7 @@ import 'package:frb_code/ui/rss_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:frb_code/models/rss_provider.dart';
 import 'package:frb_code/ui/lists/item_list_screen.dart';
-import 'package:frb_code/ui/lists/scroll_area.dart';
+import 'package:frb_code/ui/lists/utils/scroll_area.dart';
 
 class GroupListScreen extends StatelessWidget {
   const GroupListScreen({super.key});

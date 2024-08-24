@@ -6,6 +6,9 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
+Future<String> getRelativeTime({required String utcTimeStr}) =>
+    RustLib.instance.api.crateApiSimpleGetRelativeTime(utcTimeStr: utcTimeStr);
+
 Future<bool> checkIfFileExists({required String filePath}) =>
     RustLib.instance.api.crateApiSimpleCheckIfFileExists(filePath: filePath);
 

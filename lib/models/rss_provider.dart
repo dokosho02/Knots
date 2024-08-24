@@ -3,13 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:frb_code/src/rust/api/simple.dart';
 import 'package:logger/logger.dart';
-import 'dart:io';
 
 import 'package:path/path.dart';
-import 'package:frb_code/tools/utils.dart';
+import 'package:frb_code/tools/folder_permission.dart';
 
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class RssProvider with ChangeNotifier {
   final Logger _logger = Logger();
@@ -32,29 +29,12 @@ class RssProvider with ChangeNotifier {
 
   Future<String> getFullDatabaseName() async {
     const databaseName = "rss.db";
-    String? dbFolder;
-
-    if (isDesktop) {
-      dbFolder = Platform.environment['sync'];
-    } else {
-      dbFolder = "/storage/emulated/0/Download/sync";
-      Directory? externalDir = await getExternalStorageDirectory();
-      _logger.i("externalDir: $externalDir");
-    }
-    final fullPath = join(dbFolder!, databaseName);
+    final dbFolder = await getFolder();
+    final fullPath = join(dbFolder, databaseName);
     _logger.i("fullPath: $fullPath");
 
     final fileExists = await checkIfFileExists(filePath: fullPath);
     _logger.i("fileExists: $fileExists");
-
-    await requestStoragePermission();
-    bool hasPermission = await Permission.manageExternalStorage.isGranted;
-
-    if (!hasPermission) {
-      await openAppSettings();
-    } else {
-      _logger.i("Permission granted");
-    }
 
     return fullPath;
   }
@@ -110,6 +90,7 @@ class RssProvider with ChangeNotifier {
       return "Failed to fetch contents";
     }
   }
+
 
 }
 

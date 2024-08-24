@@ -4,6 +4,44 @@ use std::io::Cursor;
 use crate::rss::feed;
 use std::path::Path;
 
+use chrono::{DateTime, Utc, TimeZone};
+use std::num::ParseIntError;
+
+pub async fn get_relative_time(utc_time_str: &str) -> Result<String, String> {
+    // 解析 UTC 时间字符串
+    let timestamp = match DateTime::parse_from_rfc3339(&format!("{}Z", utc_time_str.replace(" UTC", ""))) {
+        Ok(dt) => dt.with_timezone(&Utc),
+        Err(_) => return Err("Invalid time format".to_string()),
+    };
+
+    // 获取当前时间
+    let now = Utc::now();
+
+    // 计算时间差（秒）
+    let seconds_difference = (now - timestamp).num_seconds();
+
+    // 定义时间间隔
+    let intervals = [
+        ("Y", 365 * 24 * 60 * 60),
+        ("M", 30 * 24 * 60 * 60),
+        ("w", 7 * 24 * 60 * 60),
+        ("d", 24 * 60 * 60),
+        ("h", 60 * 60),
+        ("m", 60),
+        ("s", 1),
+    ];
+
+    // 计算并返回相对时间
+    for &(label, value) in &intervals {
+        let amount = seconds_difference / value;
+        if amount >= 1 {
+            println!("{}{}", amount, label);
+            return Ok(format!("{}{}", amount, label));
+        }
+    }
+
+    Ok("0s".to_string())
+}
 
 pub async fn check_if_file_exists(file_path: &str) -> Result<bool, bool> {
     let path = Path::new(file_path);
