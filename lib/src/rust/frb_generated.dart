@@ -58,7 +58,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.1.0';
 
   @override
-  int get rustContentHash => -1048105876;
+  int get rustContentHash => -1262120208;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -83,18 +83,36 @@ abstract class RustLibApi extends BaseApi {
 
   Future<bool> crateApiSimpleCheckIfFileExists({required String filePath});
 
+  Future<void> crateApiSimpleCreateCurrentSettingsDbAsync(
+      {required String dbPath});
+
   Future<FileProcessor> crateApiSimpleCreateProcessor(
       {required String fileType});
 
   Future<String> crateApiSimpleFetchContentsByItemLinkAsync(
       {required String dbPath, required String itemLink});
 
+  Future<String> crateApiSimpleFetchCurrentFeedLinkAsync(
+      {required String dbPath});
+
+  Future<String> crateApiSimpleFetchCurrentItemLinkAsync(
+      {required String dbPath});
+
+  Future<String> crateApiSimpleFetchFeedTitleAsync(
+      {required String dbPath, required String link});
+
   Future<List<(String, String)>> crateApiSimpleFetchFeedsFromDatabaseAsync(
       {required String dbPath});
+
+  Future<String> crateApiSimpleFetchItemTitleAsync(
+      {required String dbPath, required String link});
 
   Future<List<(String, String, String)>>
       crateApiSimpleFetchItemsByFeedLinkAsync(
           {required String dbPath, required String feedLink});
+
+  Future<String> crateApiSimpleFetchPublishedAtAsync(
+      {required String dbPath, required String link});
 
   Future<List<String>> crateApiSimpleFinalizeProcessing(
       {required FileProcessor processor});
@@ -107,6 +125,12 @@ abstract class RustLibApi extends BaseApi {
 
   Future<FileProcessor> crateApiSimpleProcessChunk(
       {required FileProcessor processor, required List<int> chunk});
+
+  Future<void> crateApiSimpleUpdateCurrentFeedLinkAsync(
+      {required String dbPath, required String link});
+
+  Future<void> crateApiSimpleUpdateCurrentItemLinkAsync(
+      {required String dbPath, required String link});
 
   RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_FileProcessor;
@@ -262,6 +286,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiSimpleCreateCurrentSettingsDbAsync(
+      {required String dbPath}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(dbPath, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 6, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: sse_decode_String,
+      ),
+      constMeta: kCrateApiSimpleCreateCurrentSettingsDbAsyncConstMeta,
+      argValues: [dbPath],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiSimpleCreateCurrentSettingsDbAsyncConstMeta =>
+      const TaskConstMeta(
+        debugName: "create_current_settings_db_async",
+        argNames: ["dbPath"],
+      );
+
+  @override
   Future<FileProcessor> crateApiSimpleCreateProcessor(
       {required String fileType}) {
     return handler.executeNormal(NormalTask(
@@ -269,7 +319,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(fileType, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 6, port: port_);
+            funcId: 7, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData:
@@ -297,7 +347,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_String(dbPath, serializer);
         sse_encode_String(itemLink, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 7, port: port_);
+            funcId: 8, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_String,
@@ -316,6 +366,85 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<String> crateApiSimpleFetchCurrentFeedLinkAsync(
+      {required String dbPath}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(dbPath, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 9, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_String,
+        decodeErrorData: sse_decode_String,
+      ),
+      constMeta: kCrateApiSimpleFetchCurrentFeedLinkAsyncConstMeta,
+      argValues: [dbPath],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiSimpleFetchCurrentFeedLinkAsyncConstMeta =>
+      const TaskConstMeta(
+        debugName: "fetch_current_feed_link_async",
+        argNames: ["dbPath"],
+      );
+
+  @override
+  Future<String> crateApiSimpleFetchCurrentItemLinkAsync(
+      {required String dbPath}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(dbPath, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 10, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_String,
+        decodeErrorData: sse_decode_String,
+      ),
+      constMeta: kCrateApiSimpleFetchCurrentItemLinkAsyncConstMeta,
+      argValues: [dbPath],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiSimpleFetchCurrentItemLinkAsyncConstMeta =>
+      const TaskConstMeta(
+        debugName: "fetch_current_item_link_async",
+        argNames: ["dbPath"],
+      );
+
+  @override
+  Future<String> crateApiSimpleFetchFeedTitleAsync(
+      {required String dbPath, required String link}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(dbPath, serializer);
+        sse_encode_String(link, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 11, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_String,
+        decodeErrorData: sse_decode_String,
+      ),
+      constMeta: kCrateApiSimpleFetchFeedTitleAsyncConstMeta,
+      argValues: [dbPath, link],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiSimpleFetchFeedTitleAsyncConstMeta =>
+      const TaskConstMeta(
+        debugName: "fetch_feed_title_async",
+        argNames: ["dbPath", "link"],
+      );
+
+  @override
   Future<List<(String, String)>> crateApiSimpleFetchFeedsFromDatabaseAsync(
       {required String dbPath}) {
     return handler.executeNormal(NormalTask(
@@ -323,7 +452,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(dbPath, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 8, port: port_);
+            funcId: 12, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_list_record_string_string,
@@ -342,6 +471,33 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<String> crateApiSimpleFetchItemTitleAsync(
+      {required String dbPath, required String link}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(dbPath, serializer);
+        sse_encode_String(link, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 13, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_String,
+        decodeErrorData: sse_decode_String,
+      ),
+      constMeta: kCrateApiSimpleFetchItemTitleAsyncConstMeta,
+      argValues: [dbPath, link],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiSimpleFetchItemTitleAsyncConstMeta =>
+      const TaskConstMeta(
+        debugName: "fetch_item_title_async",
+        argNames: ["dbPath", "link"],
+      );
+
+  @override
   Future<List<(String, String, String)>>
       crateApiSimpleFetchItemsByFeedLinkAsync(
           {required String dbPath, required String feedLink}) {
@@ -351,7 +507,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_String(dbPath, serializer);
         sse_encode_String(feedLink, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 9, port: port_);
+            funcId: 14, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_list_record_string_string_string,
@@ -370,6 +526,33 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<String> crateApiSimpleFetchPublishedAtAsync(
+      {required String dbPath, required String link}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(dbPath, serializer);
+        sse_encode_String(link, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 15, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_String,
+        decodeErrorData: sse_decode_String,
+      ),
+      constMeta: kCrateApiSimpleFetchPublishedAtAsyncConstMeta,
+      argValues: [dbPath, link],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiSimpleFetchPublishedAtAsyncConstMeta =>
+      const TaskConstMeta(
+        debugName: "fetch_published_at_async",
+        argNames: ["dbPath", "link"],
+      );
+
+  @override
   Future<List<String>> crateApiSimpleFinalizeProcessing(
       {required FileProcessor processor}) {
     return handler.executeNormal(NormalTask(
@@ -378,7 +561,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerFileProcessor(
             processor, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 10, port: port_);
+            funcId: 16, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_list_String,
@@ -403,7 +586,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(utcTimeStr, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 11, port: port_);
+            funcId: 17, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_String,
@@ -427,7 +610,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(name, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 12)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 18)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_String,
@@ -450,7 +633,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 13, port: port_);
+            funcId: 19, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -477,7 +660,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             processor, serializer);
         sse_encode_list_prim_u_8_loose(chunk, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 14, port: port_);
+            funcId: 20, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData:
@@ -493,6 +676,60 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiSimpleProcessChunkConstMeta => const TaskConstMeta(
         debugName: "process_chunk",
         argNames: ["processor", "chunk"],
+      );
+
+  @override
+  Future<void> crateApiSimpleUpdateCurrentFeedLinkAsync(
+      {required String dbPath, required String link}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(dbPath, serializer);
+        sse_encode_String(link, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 21, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: sse_decode_String,
+      ),
+      constMeta: kCrateApiSimpleUpdateCurrentFeedLinkAsyncConstMeta,
+      argValues: [dbPath, link],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiSimpleUpdateCurrentFeedLinkAsyncConstMeta =>
+      const TaskConstMeta(
+        debugName: "update_current_feed_link_async",
+        argNames: ["dbPath", "link"],
+      );
+
+  @override
+  Future<void> crateApiSimpleUpdateCurrentItemLinkAsync(
+      {required String dbPath, required String link}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(dbPath, serializer);
+        sse_encode_String(link, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 22, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: sse_decode_String,
+      ),
+      constMeta: kCrateApiSimpleUpdateCurrentItemLinkAsyncConstMeta,
+      argValues: [dbPath, link],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiSimpleUpdateCurrentItemLinkAsyncConstMeta =>
+      const TaskConstMeta(
+        debugName: "update_current_item_link_async",
+        argNames: ["dbPath", "link"],
       );
 
   RustArcIncrementStrongCountFnType

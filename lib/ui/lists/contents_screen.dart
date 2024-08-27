@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:frb_code/models/rss_provider.dart';
 import 'package:frb_code/ui/lists/utils/scroll_area.dart';
 import 'package:frb_code/ui/lists/utils/interactive_image.dart';
 import 'package:frb_code/tools/fonts_tools.dart';
 
+import 'package:frb_code/src/rust/api/simple.dart';
+import 'package:frb_code/tools/folder_permission.dart';
+
 class ContentsScreen extends StatefulWidget {
-  final String url;
-  final String title;
-  final String publishedAt;
+  // final String url;
+  // final String title;
+  // final String publishedAt;
 
   const ContentsScreen({
     super.key,
-    required this.url,
-    required this.title,
-    required this.publishedAt,
+    // required this.url,
+    // required this.title,
+    // required this.publishedAt,
   });
 
   @override
@@ -25,15 +29,47 @@ class ContentsScreen extends StatefulWidget {
 class ContentsScreenState extends State<ContentsScreen> {
   final ScrollController _scrollController = ScrollController();
 
+  late String currentItemLink;
+  late String itemTitle;
+  late String publishedAt;
+  late String preText;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCurrentItemLink().then((_) {
+      setState(() {
+        // 任何其他初始化逻辑
+      });
+      _fetchContents(); // 现在你可以调用这个方法
+    });
+  }
+
+
+  Future<void> fetchCurrentItemLink() async {
+    final databaseName = await getFullDatabaseName();
+    final currentLogDB = await getCurrentSettingsDatabaseName();
+    currentItemLink = await fetchCurrentItemLinkAsync(dbPath: currentLogDB);
+    itemTitle = await fetchItemTitleAsync(dbPath: databaseName, link: currentItemLink);
+    publishedAt = await fetchPublishedAtAsync(dbPath: databaseName, link: currentItemLink);
+    preText = '<h1>$itemTitle</h1>\n<p>$publishedAt</p>\n';
+  }
+
+  Future<String> _fetchContents() async {
+    final rssProvider = Provider.of<RssProvider>(context, listen: false);
+    final contents = await rssProvider.fetchContents(currentItemLink);
+    return contents;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final rssProvider = Provider.of<RssProvider>(context, listen: false);
+    // final rssProvider = Provider.of<RssProvider>(context, listen: false);
     final screenWidth = MediaQuery.of(context).size.width;
 
     // const double contentPadding = 16.0;
-    double contentPadding = screenWidth * 0.04;
+    double contentPadding = screenWidth * 0.05;
 
-    final preText = '<h1>${widget.title}</h1>\n<p>${widget.publishedAt}</p>\n';
+    // const preText = '';
 
     double fontSize;
     if (screenWidth < 500) {
@@ -44,8 +80,8 @@ class ContentsScreenState extends State<ContentsScreen> {
       fontSize = 28;
     }
 
-    return FutureBuilder<String>(
-      future: rssProvider.fetchContents(widget.url),
+    return FutureBuilder<void>(
+      future: fetchCurrentItemLink(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -55,6 +91,30 @@ class ContentsScreenState extends State<ContentsScreen> {
           return Center(
             child: Text('Error loading content: ${snapshot.error}'),
           );
+        } else {
+    return FutureBuilder<String>(
+      future: _fetchContents(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (snapshot.hasError) {
+          return Scaffold(
+                  appBar: AppBar(
+                    title: const Text('Error loading content'),
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        GoRouter.of(context).pop();
+                      },
+                    ),
+                  ),
+            body:
+          Center(
+            child: Text('Error loading content: ${snapshot.error}'),
+          )
+          );
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(
             child: Text('No content found for this item.'),
@@ -62,27 +122,39 @@ class ContentsScreenState extends State<ContentsScreen> {
         } else {
           final finalText = '$preText${snapshot.data!}';
           return Scaffold(
-              body: FocusScope(
-                autofocus: true,
-            child: Stack(
-              children: [
-                SelectionArea(
-                  child: Padding(
-                    padding: EdgeInsets.all(contentPadding),
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      child: buildHtmlWidget(finalText, fontSize),
+                  appBar: AppBar(
+                    title: Text(itemTitle),
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        GoRouter.of(context).pop();
+                      },
                     ),
                   ),
-                ),
-                ScrollArea(
-                  scrollController: _scrollController,
-                  contentPadding: contentPadding,
-                ),
-              ],
+              body: FocusScope(
+                autofocus: true,
+                child: Stack(
+                  children: [
+                    SelectionArea(
+                      child: Padding(
+                        padding: EdgeInsets.all(contentPadding),
+                        child: SingleChildScrollView(
+                          controller: _scrollController,
+                          child: buildHtmlWidget(finalText, fontSize),
+                        ),
+                      ),
+                    ),
+                    ScrollArea(
+                      scrollController: _scrollController,
+                      contentPadding: contentPadding,
+                    ),
+                  ],
             ),
           ),
           );
+        }
+      },
+    );
         }
       },
     );
@@ -106,7 +178,7 @@ class ContentsScreenState extends State<ContentsScreen> {
       customStylesBuilder: (element) {
         if (element.localName == 'h1') {
           return {
-            'font-size': '1.6em',
+            'font-size': '1.4em',
             'line-height': '1.1em',
           };
         }

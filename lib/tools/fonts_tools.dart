@@ -8,8 +8,13 @@ import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:path/path.dart';
 
+
+
 const zhFont = 'LXGWWenKai';
 const engFont = 'Ubuntu';
+
+
+// double appFontSize;
 
 
   String getElementFontFamily(dom.Element element) {

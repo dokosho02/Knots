@@ -4,8 +4,8 @@ use std::io::Cursor;
 use crate::rss::feed;
 use std::path::Path;
 
-use chrono::{DateTime, Utc, TimeZone};
-use std::num::ParseIntError;
+use chrono::{DateTime, Utc};
+// use std::num::ParseIntError;
 
 pub async fn get_relative_time(utc_time_str: &str) -> Result<String, String> {
     // 解析 UTC 时间字符串
@@ -76,6 +76,56 @@ pub async fn fetch_contents_by_item_link_async(db_path: &str, item_link: &str) -
     .map_err(|e| e.to_string())?;
     Ok(content)
 }
+
+
+pub async fn fetch_current_feed_link_async(db_path: &str) -> Result<String, String> {
+    let link = feed::fetch_current_feed_link(db_path).await
+    .map_err(|e| e.to_string())?;
+    Ok(link)
+}
+
+pub async fn update_current_feed_link_async(db_path: &str, link: &str) -> Result<(), String> {
+    feed::update_current_feed_link(db_path, link).await
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+pub async fn fetch_current_item_link_async(db_path: &str) -> Result<String, String> {
+    let link = feed::fetch_current_item_link(db_path).await
+    .map_err(|e| e.to_string())?;
+    Ok(link)
+}
+
+pub async fn update_current_item_link_async(db_path: &str, link: &str) -> Result<(), String> {
+    feed::update_current_item_link(db_path, link).await
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+pub async fn fetch_feed_title_async(db_path: &str, link: &str) -> Result<String, String> {
+    let title = feed::fetch_feed_title_by_link(db_path, link).await
+    .map_err(|e| e.to_string())?;
+    Ok(title)
+}
+
+pub async fn fetch_item_title_async(db_path: &str, link: &str) -> Result<String, String> {
+    let title = feed::fetch_item_title_by_link(db_path, link).await
+    .map_err(|e| e.to_string())?;
+    Ok(title)
+}
+
+pub async fn fetch_published_at_async(db_path: &str, link: &str) -> Result<String, String> {
+    let published_at = feed::fetch_published_at_by_link(db_path, link).await
+    .map_err(|e| e.to_string())?;
+    Ok(published_at)
+}
+
+pub async fn create_current_settings_db_async(db_path: &str) -> Result<(), String> {
+    feed::create_current_settings_db(db_path).await
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 
 
 #[flutter_rust_bridge::frb(opaque)]

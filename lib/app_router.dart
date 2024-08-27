@@ -3,11 +3,16 @@
 // import 'package:frb_code/ui/home_scaffold.dart';
 // import 'package:frb_code/ui/book_screen.dart';
 // import 'package:frb_code/ui/rss_screen.dart';
-// // import 'package:frb_code/ui/editor_screen.dart';
+// import 'package:frb_code/ui/editor_screen.dart';
 // import 'package:frb_code/ui/lists/group_list_screen.dart';
 // import 'package:frb_code/ui/lists/item_list_screen.dart';
 // import 'package:frb_code/ui/utils/add_feed_screen.dart';
 // import 'package:frb_code/ui/utils/settings_screen.dart';
+
+
+
+
+
 
 // final GoRouter router = GoRouter(
 //   routes: [
@@ -19,6 +24,7 @@
 //         showLabels: true,
 //         bookScreenKey: GlobalKey<BookScreenState>(),
 //         rssScreenKey: GlobalKey<RssScreenState>(),
+//         editorScreenKey: GlobalKey<EditorScreenState>(),
 //         toggleLabels: (value) {},
 //       ),
 //       routes: [
@@ -36,6 +42,7 @@
 //                   showLabels: true,
 //                   bookScreenKey: GlobalKey<BookScreenState>(),
 //                   rssScreenKey: GlobalKey<RssScreenState>(),
+//                   editorScreenKey: GlobalKey<EditorScreenState>(),
 //                   toggleLabels: (value) {},
 //                   appBarTitle: feedUrl,
 //                 );

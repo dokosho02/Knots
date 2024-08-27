@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:frb_code/src/rust/api/simple.dart';
 import 'package:logger/logger.dart';
 
-import 'package:path/path.dart';
 import 'package:frb_code/tools/folder_permission.dart';
 
 
@@ -27,19 +26,14 @@ class RssProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<String> getFullDatabaseName() async {
-    const databaseName = "rss.db";
-    final dbFolder = await getFolder();
-    final fullPath = join(dbFolder, databaseName);
-    _logger.i("fullPath: $fullPath");
-
-    final fileExists = await checkIfFileExists(filePath: fullPath);
-    _logger.i("fileExists: $fileExists");
-
-    return fullPath;
-  }
 
   Future<void> fetchFeeds() async {
+    // init current settings db
+    final databaseName = await getCurrentSettingsDatabaseName();
+    await createCurrentSettingsDbAsync(dbPath: databaseName);
+
+    print("databaseName: $databaseName in fetchFeeds");
+
     final fullPath = await getFullDatabaseName();
     try {
       // 保留从数据库获取的标题和链接
@@ -55,9 +49,12 @@ class RssProvider with ChangeNotifier {
   }
 
   Future<void> fetchItems(String feedLink) async {
+
+    // get current rss db
     final fullPath = await getFullDatabaseName();
+    print("fullPath: $fullPath in fetchItems");
     if (_feeds.isEmpty) {
-      _logger.e("No feeds to fetch items from");
+      _logger.e("No feeds to fetch items from for feed $feedLink");
       return;
     }
 

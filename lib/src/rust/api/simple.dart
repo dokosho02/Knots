@@ -34,6 +34,43 @@ Future<String> fetchContentsByItemLinkAsync(
     RustLib.instance.api.crateApiSimpleFetchContentsByItemLinkAsync(
         dbPath: dbPath, itemLink: itemLink);
 
+Future<String> fetchCurrentFeedLinkAsync({required String dbPath}) =>
+    RustLib.instance.api
+        .crateApiSimpleFetchCurrentFeedLinkAsync(dbPath: dbPath);
+
+Future<void> updateCurrentFeedLinkAsync(
+        {required String dbPath, required String link}) =>
+    RustLib.instance.api
+        .crateApiSimpleUpdateCurrentFeedLinkAsync(dbPath: dbPath, link: link);
+
+Future<String> fetchCurrentItemLinkAsync({required String dbPath}) =>
+    RustLib.instance.api
+        .crateApiSimpleFetchCurrentItemLinkAsync(dbPath: dbPath);
+
+Future<void> updateCurrentItemLinkAsync(
+        {required String dbPath, required String link}) =>
+    RustLib.instance.api
+        .crateApiSimpleUpdateCurrentItemLinkAsync(dbPath: dbPath, link: link);
+
+Future<String> fetchFeedTitleAsync(
+        {required String dbPath, required String link}) =>
+    RustLib.instance.api
+        .crateApiSimpleFetchFeedTitleAsync(dbPath: dbPath, link: link);
+
+Future<String> fetchItemTitleAsync(
+        {required String dbPath, required String link}) =>
+    RustLib.instance.api
+        .crateApiSimpleFetchItemTitleAsync(dbPath: dbPath, link: link);
+
+Future<String> fetchPublishedAtAsync(
+        {required String dbPath, required String link}) =>
+    RustLib.instance.api
+        .crateApiSimpleFetchPublishedAtAsync(dbPath: dbPath, link: link);
+
+Future<void> createCurrentSettingsDbAsync({required String dbPath}) =>
+    RustLib.instance.api
+        .crateApiSimpleCreateCurrentSettingsDbAsync(dbPath: dbPath);
+
 Future<FileProcessor> createProcessor({required String fileType}) =>
     RustLib.instance.api.crateApiSimpleCreateProcessor(fileType: fileType);
 

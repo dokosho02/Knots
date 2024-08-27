@@ -5,6 +5,8 @@ use sqlx::sqlite::SqlitePool;
 use std::error::Error;
 use sqlx::Row; // 导入 Row trait 以便使用 get 方法
 
+use std::path::Path;
+use std::fs::File;
 
 
 pub async fn add_feed_to_db(db_path: &str, title: &str, link: &str) -> Result<(), Box<dyn Error>> {
@@ -66,13 +68,15 @@ pub async fn fetch_feeds_from_db(db_path: &str) -> Result<Vec<(String, String)>,
 }
 
 
+
 pub async fn fetch_items_by_feed_link(db_path: &str, feed_link: &str) -> Result<(Vec<(String, String, String)>), Box<dyn Error>> {
     // 连接到数据库
     let pool = SqlitePool::connect(&format!("sqlite:{}", db_path)).await?;
 
     // 查询与给定 feed_link 相关的所有条目
     let items = sqlx::query(
-        "SELECT title, link, published_at FROM items WHERE feed_link = ?"
+        // "SELECT title, link, published_at FROM items WHERE feed_link = ?"
+        "SELECT title, link, published_at FROM items WHERE feed_link = ? ORDER BY published_at DESC"
     )
     .bind(feed_link)
     .fetch_all(&pool)
@@ -116,7 +120,199 @@ pub async fn fetch_contents_by_item_link(db_path: &str, item_link: &str) -> Resu
 }
 
 
+pub async fn fetch_current_feed_link(db_path: &str) -> Result<String, Box<dyn Error>> {
+    // 连接到数据库
+    let pool = SqlitePool::connect(&format!("sqlite:{}", db_path)).await?;
 
+    // 查询与给定 item_link 相关的内容
+    let result = sqlx::query(
+        "SELECT current_feed_link FROM current_params WHERE current_index = 1"
+    )
+    .fetch_one(&pool)
+    .await?;
+
+    // 从查询结果中获取内容
+    let link: String = result.get("current_feed_link");
+
+    println!("current_feed_link get: {}", link);
+
+    // 返回内容
+    Ok(link)
+}
+
+pub async fn update_current_feed_link(db_path: &str, link: &str) -> Result<(), Box<dyn Error>> {
+    // 连接到数据库
+
+    println!("db_path: {}, link: {}", db_path, link);
+    
+    let pool = SqlitePool::connect(&format!("sqlite:{}", db_path)).await?;
+
+    let current_index = 1;
+    // 更新 current_feed_link
+    sqlx::query(
+        "INSERT OR REPLACE INTO current_params (current_index, current_feed_link, current_item_link) VALUES (?, ?, ?)"
+    )
+    .bind(current_index)
+    .bind(link)
+    .bind("https://www.example.com")
+    .execute(&pool)
+    .await?;
+
+
+    println!("current_feed_link updated to: {}", link);
+
+    // 返回 Ok
+    Ok(())
+}
+
+pub async fn fetch_current_item_link(db_path: &str) -> Result<String, Box<dyn Error>> {
+    // 连接到数据库
+    let pool = SqlitePool::connect(&format!("sqlite:{}", db_path)).await?;
+
+    // 查询与给定 item_link 相关的内容
+    let result = sqlx::query(
+        "SELECT current_item_link FROM current_params WHERE current_index = 1"
+    )
+    .fetch_one(&pool)
+    .await?;
+
+    // 从查询结果中获取内容
+    let link: String = result.get("current_item_link");
+
+    // 返回内容
+    Ok(link)
+}
+
+pub async fn update_current_item_link(db_path: &str, link: &str) -> Result<(), Box<dyn Error>> {
+    // 连接到数据库
+    let pool = SqlitePool::connect(&format!("sqlite:{}", db_path)).await?;
+
+    // 查询与给定 item_link 相关的内容
+    let result = sqlx::query(
+        "SELECT * FROM current_params WHERE current_index = 1"
+    )
+    .fetch_one(&pool)
+    .await?;
+
+    // 从查询结果中获取内容
+    // let link: String = result.get("current_item_link");
+    let feed_link: String = result.get("current_feed_link");
+    let current_index: i32 = result.get("current_index");
+
+    // 更新 current_item_link
+    sqlx::query(
+        "INSERT OR REPLACE INTO current_params (current_index, current_feed_link, current_item_link) VALUES (?, ?, ?)"
+    )
+    .bind(current_index)
+    .bind(feed_link)
+    .bind(link)
+    .execute(&pool)
+    .await?;
+
+    println!("current_item_link updated to: {}", &link);
+
+    // 返回 Ok
+    Ok(())
+}
+
+pub async fn fetch_feed_title_by_link(db_path: &str, link: &str) -> Result<String, Box<dyn Error>> {
+    // 连接到数据库
+    let pool = SqlitePool::connect(&format!("sqlite:{}", db_path)).await?;
+
+    // 查询与给定 item_link 相关的内容
+    let result = sqlx::query(
+        "SELECT title FROM feeds WHERE link = ?"
+    )
+    .bind(link)
+    .fetch_one(&pool)
+    .await?;
+
+    // 从查询结果中获取内容
+    let title: String = result.get("title");
+
+    // 返回内容
+    Ok(title)
+}
+
+pub async fn fetch_item_title_by_link(db_path: &str, link: &str) -> Result<String, Box<dyn Error>> {
+    // 连接到数据库
+    let pool = SqlitePool::connect(&format!("sqlite:{}", db_path)).await?;
+
+    // 查询与给定 item_link 相关的内容
+    let result = sqlx::query(
+        "SELECT title FROM items WHERE link = ?"
+    )
+    .bind(link)
+    .fetch_one(&pool)
+    .await?;
+
+    // 从查询结果中获取内容
+    let title: String = result.get("title");
+
+    // 返回内容
+    Ok(title)
+}
+
+pub async fn fetch_published_at_by_link(db_path: &str, link: &str) -> Result<String, Box<dyn Error>> {
+    // 连接到数据库
+    let pool = SqlitePool::connect(&format!("sqlite:{}", db_path)).await?;
+
+    // 查询与给定 item_link 相关的内容
+    let result = sqlx::query(
+        "SELECT published_at FROM items WHERE link = ?"
+    )
+    .bind(link)
+    .fetch_one(&pool)
+    .await?;
+
+    // 从查询结果中获取内容
+    let published_at: String = result.get("published_at");
+
+    // 返回内容
+    Ok(published_at)
+}
+
+pub async fn create_current_settings_db(db_path: &str) -> Result<(), Box<dyn Error>> {
+
+    println!("create db_path: {}", db_path);
+
+    // check if the database file exists, if not, create it
+    let path = Path::new(db_path);
+    if !path.exists() {
+        File::create(&path).expect("Failed to create database file");
+        println!("Database file created: {}", db_path);
+    } else {
+        println!("Database file already exists: {}", db_path);
+    }
+
+
+    // let path = Path::new(db_path);
+    // if !path.exists() {
+    //     File::create(&path).expect("Failed to create database file");
+    //     println!("Database file created: {}", db_path);
+    // } else {
+    //     println!("Database file already exists: {}", db_path);
+    // }
+
+    // 连接到数据库
+    let pool = SqlitePool::connect(&format!("sqlite:{}", db_path)).await?;
+
+    // 创建 current_params 表
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS current_params (
+            current_index INTEGER PRIMARY KEY,
+            current_feed_link TEXT,
+            current_item_link TEXT
+        )"
+    )
+    .execute(&pool)
+    .await?;
+
+
+
+    // 返回 Ok
+    Ok(())
+}
 
 
 // async fn fetch_items_by_feed_link(db_path: &str, feed_link: &str) -> Result<(), Box<dyn Error>> {

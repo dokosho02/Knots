@@ -1,7 +1,11 @@
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:frb_code/src/rust/api/simple.dart';
 
+import 'package:path/path.dart';
 
+const databaseName = "rss.db";
+const currentSettingsDatabaseName = "current_log.db";
 
 final isDesktop = Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
@@ -19,6 +23,7 @@ Future<void> checkStoragePermission() async {
     }
   }
 }
+
 Future<void> requestStoragePermission() async {
 
   await checkStoragePermission();
@@ -41,11 +46,51 @@ Future<String> getFolder() async {
   if (isDesktop) {
     // get env sync
     return Platform.environment['sync']!;
-  } else {
+  } else if (Platform.isAndroid) {
     return "/storage/emulated/0/Download/sync";
+  } else {
+    throw Exception("Unsupported platform, maybe iOS?");
   }
 }
 
+Future<String> getDocFolder() async {
+  String userDir;
+  const docDir = "Documents";
+
+  if (isDesktop) {
+    userDir = Platform.isWindows ? Platform.environment['USERPROFILE']! : Platform.environment['HOME']!;
+  } else if (Platform.isAndroid) {
+    userDir = "/storage/emulated/0";
+  } else {
+    throw Exception("Unsupported platform, maybe iOS?");
+  }
+
+  // Todo: iOS in the future
+  return join(userDir, docDir);
+
+}
+
+Future<String> getCurrentSettingsDatabaseName() async {
+  final dbFolder = await getDocFolder();
+  final fullPath = join(dbFolder, currentSettingsDatabaseName);
+  print("fullPath: $fullPath");
+
+  final fileExists = await checkIfFileExists(filePath: fullPath);
+  print("fileExists: $fileExists"); 
+
+  return fullPath;
+}
+
+Future<String> getFullDatabaseName() async {
+  final dbFolder = await getFolder();
+  final fullPath = join(dbFolder, databaseName);
+  print("fullPath: $fullPath");
+
+  final fileExists = await checkIfFileExists(filePath: fullPath);
+  print("fileExists: $fileExists");
+
+  return fullPath;
+}
 
 // import 'dart:io';
 // import 'package:permission_handler/permission_handler.dart';
