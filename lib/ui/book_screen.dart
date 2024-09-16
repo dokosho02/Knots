@@ -11,7 +11,6 @@ class BookScreen extends StatefulWidget {
 }
 
 class BookScreenState extends State<BookScreen> {
-  String _fileName = "please select an EPUB file";
   final Logger _logger = Logger();
   String _htmlContent = '';
 
@@ -24,13 +23,11 @@ class BookScreenState extends State<BookScreen> {
       );
 
       if (result == null || result.files.isEmpty) {
-        setState(() => _fileName = "No file selected");
         return;
       }
       final file = result.files.first;
       final fileExt = file.extension!;
       if (file.readStream == null) {
-        setState(() => _fileName = "Error: Unable to read file");
         return;
       }
       _logger.i('selected file: ${file.name}\nsize: ${file.size} bytes');
@@ -43,11 +40,9 @@ class BookScreenState extends State<BookScreen> {
           _htmlContent = response.join('<hr/>'); // 使用分隔符将各个章节内容连接起来
         });
       } else {
-        setState(() => _fileName = "Error processing EPUB");
       }
     } catch (e) {
       _logger.e('Error processing file: $e');
-      setState(() => _fileName = "Error processing file: $e");
     }
   }
 

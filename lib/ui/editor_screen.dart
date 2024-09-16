@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frb_code/tools/fonts_tools.dart';
 
 class EditorScreen extends StatefulWidget {
   const EditorScreen({super.key});
@@ -11,8 +12,13 @@ class EditorScreen extends StatefulWidget {
 class EditorScreenState extends State<EditorScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Center(
-        child: Text('文字编辑器屏幕'),
+    double fontSize = calculateFontSize(context);
+
+    return Center(
+        child: buildRichTextWithMaxLines(
+          text: "文字编辑器 - EditorScreen",
+          fontSize: fontSize,
+        ),
       );
     }
   }

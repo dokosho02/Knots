@@ -61,11 +61,15 @@ class RssProvider with ChangeNotifier {
     try {
       // 调用 Rust 异步函数
       final List<(String, String, String)> itemsResult = await fetchItemsByFeedLinkAsync(dbPath: fullPath, feedLink: feedLink);
+      // final List<(String, String, String)> itemsResult = await fetchItemsMetaByFeedLinkAsync(dbPath: fullPath, feedLink: feedLink);
+
       // 使用 Map 存储 item 的数据
       _items = itemsResult.map((e) => {
         'title': e.$1,  // Item 的标题
         'link': e.$2,  // Item 的描述
-        'time': e.$3   // Item 的链接
+        'time': e.$3,   // Item 的链接
+        // 'isStarred': e.$4.toString(),  // Item 是否被标记为 Starred
+        // 'isRead': e.$5.toString()  // Item 是否被标记为 Read
       }).toList();
 
       notifyListeners();

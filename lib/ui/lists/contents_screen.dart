@@ -1,3 +1,4 @@
+// import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,10 @@ import 'package:frb_code/tools/fonts_tools.dart';
 
 import 'package:frb_code/src/rust/api/simple.dart';
 import 'package:frb_code/tools/folder_permission.dart';
+
+import 'package:url_launcher/url_launcher.dart';
+
+
 
 class ContentsScreen extends StatefulWidget {
   // final String url;
@@ -65,20 +70,19 @@ class ContentsScreenState extends State<ContentsScreen> {
   Widget build(BuildContext context) {
     // final rssProvider = Provider.of<RssProvider>(context, listen: false);
     final screenWidth = MediaQuery.of(context).size.width;
-
     // const double contentPadding = 16.0;
     double contentPadding = screenWidth * 0.05;
 
     // const preText = '';
 
-    double fontSize;
-    if (screenWidth < 500) {
-      fontSize = 18;
-    } else if (screenWidth < 1000) {
-      fontSize = 23;
-    } else {
-      fontSize = 28;
-    }
+    double fontSize = calculateFontSize(context);
+    // if (screenWidth < 500) {
+    //   fontSize = 18;
+    // } else if (screenWidth < 1000) {
+    //   fontSize = 23;
+    // } else {
+    //   fontSize = 28;
+    // }
 
     return FutureBuilder<void>(
       future: fetchCurrentItemLink(),
@@ -116,14 +120,9 @@ class ContentsScreenState extends State<ContentsScreen> {
           )
           );
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(
-            child: Text('No content found for this item.'),
-          );
-        } else {
-          final finalText = '$preText${snapshot.data!}';
           return Scaffold(
                   appBar: AppBar(
-                    title: Text(itemTitle),
+                    title: const Text('No content found'),
                     leading: IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () {
@@ -131,6 +130,39 @@ class ContentsScreenState extends State<ContentsScreen> {
                       },
                     ),
                   ),
+            body:
+          const Center(
+            child: Text('No content found for this item.'),
+          )
+          );
+        } else {
+          final finalText = '$preText${snapshot.data!}';
+          return Scaffold(
+                  appBar: AppBar(
+                    title: buildRichTextWithMaxLines(
+                      text: itemTitle,
+                      fontSize: fontSize,
+                      ),
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        GoRouter.of(context).pop();
+                      },
+                    ),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.open_in_browser),
+                      onPressed: () async {
+                        final Uri url = Uri.parse(currentItemLink);
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url);
+                        } else {
+                          print('Could not launch $currentItemLink');
+                        }
+                      },
+                    ),
+                  ],
+                ),
               body: FocusScope(
                 autofocus: true,
                 child: Stack(
@@ -173,6 +205,28 @@ class ContentsScreenState extends State<ContentsScreen> {
             return InteractiveImage(imageUrl: imageUrl);
           }
         }
+        //  if (element.localName == 'a' && element.attributes.containsKey('href')) {
+        //   final link = element.attributes['href']!;
+        //   return Text.rich(
+        //     TextSpan(
+        //       text: element.text.trim(),
+        //       // style: const TextStyle(
+        //         // color: Colors.blue,
+        //         // decoration: TextDecoration.underline,
+        //       // ),
+        //       recognizer: TapGestureRecognizer()
+        //         ..onTap = () async {
+        //           final Uri url = Uri.parse(link);
+        //           if (await canLaunchUrl(url)) {
+        //             await launchUrl(url);
+        //           } else {
+        //             print('Could not launch $link');
+        //           }
+        //         },
+        //     ),
+        //   );
+          
+        // }
         return null;
       },
       customStylesBuilder: (element) {
@@ -186,6 +240,8 @@ class ContentsScreenState extends State<ContentsScreen> {
         if (element.localName == 'a' && element.attributes.containsKey('href')) {
           return {
             'font-family': getElementFontFamily(element),
+            // no underline
+            'text-decoration': 'none',
           };
         }
         return {
@@ -202,22 +258,22 @@ class _CustomWidgetFactory extends WidgetFactory {
   @override
   Widget? buildText(BuildTree tree, InheritedProperties inheritedProperties, InlineSpan span) {
     if (span is TextSpan) {
-      return _buildSelectableRichText(span, inheritedProperties.style);
+      return _buildSelectableRichText(span, inheritedProperties.prepareTextStyle());
     }
     return super.buildText(tree, inheritedProperties, span);
   }
 
-  Widget _buildSelectableRichText(TextSpan span, TextStyle? parentStyle) {
+  Widget _buildSelectableRichText(TextSpan span, TextStyle parentStyle) {
     List<InlineSpan> processedChildren = [];
 
     if (span.text != null) {
-      processedChildren.addAll(processText(span.text!, span.style ?? parentStyle));
+      processedChildren.addAll(styleTextByCharacter(span.text!, span.style ?? parentStyle));
     }
 
     if (span.children != null) {
       for (var child in span.children!) {
         if (child is TextSpan) {
-          processedChildren.addAll(processText(child.text ?? '', child.style ?? span.style ?? parentStyle));
+          processedChildren.addAll(styleTextByCharacter(child.text ?? '', child.style ?? span.style ?? parentStyle));
         } else {
           processedChildren.add(child);
         }
@@ -399,13 +455,13 @@ class _CustomWidgetFactory extends WidgetFactory {
 //     List<InlineSpan> processedChildren = [];
 
 //     if (span.text != null) {
-//       processedChildren.addAll(processText(span.text!, span.style ?? parentStyle));
+//       processedChildren.addAll(styleTextByCharacter(span.text!, span.style ?? parentStyle));
 //     }
 
 //     if (span.children != null) {
 //       for (var child in span.children!) {
 //         if (child is TextSpan) {
-//           processedChildren.addAll(processText(child.text ?? '', child.style ?? span.style ?? parentStyle));
+//           processedChildren.addAll(styleTextByCharacter(child.text ?? '', child.style ?? span.style ?? parentStyle));
 //         } else {
 //           processedChildren.add(child);
 //         }

@@ -120,12 +120,24 @@ pub async fn fetch_published_at_async(db_path: &str, link: &str) -> Result<Strin
     Ok(published_at)
 }
 
+pub async fn fetch_is_starred_by_item_link_async(db_path: &str, link: &str) -> Result<i32, String> {
+    let is_starred = feed::fetch_is_read_by_item_link(db_path, link).await
+    .map_err(|e| e.to_string())?;
+    Ok(is_starred)
+}
+
+pub async fn fetch_is_read_by_item_link_async(db_path: &str, link: &str) -> Result<i32, String> {
+    let is_read = feed::fetch_is_read_by_item_link(db_path, link).await
+    .map_err(|e| e.to_string())?;
+    Ok(is_read)
+}
+
+
 pub async fn create_current_settings_db_async(db_path: &str) -> Result<(), String> {
     feed::create_current_settings_db(db_path).await
     .map_err(|e| e.to_string())?;
     Ok(())
 }
-
 
 
 #[flutter_rust_bridge::frb(opaque)]

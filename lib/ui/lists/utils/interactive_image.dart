@@ -47,6 +47,8 @@ class FullScreenImageViewerState extends State<FullScreenImageViewer> {
     });
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

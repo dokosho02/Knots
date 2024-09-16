@@ -67,6 +67,16 @@ Future<String> fetchPublishedAtAsync(
     RustLib.instance.api
         .crateApiSimpleFetchPublishedAtAsync(dbPath: dbPath, link: link);
 
+Future<int> fetchIsStarredByItemLinkAsync(
+        {required String dbPath, required String link}) =>
+    RustLib.instance.api.crateApiSimpleFetchIsStarredByItemLinkAsync(
+        dbPath: dbPath, link: link);
+
+Future<int> fetchIsReadByItemLinkAsync(
+        {required String dbPath, required String link}) =>
+    RustLib.instance.api
+        .crateApiSimpleFetchIsReadByItemLinkAsync(dbPath: dbPath, link: link);
+
 Future<void> createCurrentSettingsDbAsync({required String dbPath}) =>
     RustLib.instance.api
         .crateApiSimpleCreateCurrentSettingsDbAsync(dbPath: dbPath);

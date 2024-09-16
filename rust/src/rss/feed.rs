@@ -272,6 +272,48 @@ pub async fn fetch_published_at_by_link(db_path: &str, link: &str) -> Result<Str
     Ok(published_at)
 }
 
+
+pub async fn fetch_is_starred_by_item_link(db_path: &str, link: &str) -> Result<i32, Box<dyn Error>> {
+    // 连接到数据库
+    let pool = SqlitePool::connect(&format!("sqlite:{}", db_path)).await?;
+
+    // 查询与给定 item_link 相关的内容
+    let result = sqlx::query(
+        "SELECT isStarred FROM items WHERE link = ?"
+    )
+    .bind(link)
+    .fetch_one(&pool)
+    .await?;
+
+    // 从查询结果中获取内容
+    let res: i32 = result.get("isStarred");
+
+    // 返回内容
+    Ok(res)
+}
+
+
+pub async fn fetch_is_read_by_item_link(db_path: &str, link: &str) -> Result<i32, Box<dyn Error>> {
+    // 连接到数据库
+    let pool = SqlitePool::connect(&format!("sqlite:{}", db_path)).await?;
+
+    // 查询与给定 item_link 相关的内容
+    let result = sqlx::query(
+        "SELECT isRead FROM items WHERE link = ?"
+    )
+    .bind(link)
+    .fetch_one(&pool)
+    .await?;
+
+    // 从查询结果中获取内容
+    let res: i32 = result.get("isRead");
+
+    // 返回内容
+    Ok(res)
+}
+
+
+
 pub async fn create_current_settings_db(db_path: &str) -> Result<(), Box<dyn Error>> {
 
     println!("create db_path: {}", db_path);

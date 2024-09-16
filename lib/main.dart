@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +16,7 @@ import 'package:frb_code/ui/lists/contents_screen.dart';
 
 import 'dart:io';
 import 'package:frb_code/tools/folder_permission.dart';
+// import 'package:frb_code/tools/fonts_tools.dart';
 
 
 // import 'package:frb_code/ui/utils/settings_screen.dart';
@@ -280,9 +279,18 @@ class ScaffoldWithNavBar extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: BottomNavigationBar(
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Book'),
-          BottomNavigationBarItem(icon: Icon(Icons.rss_feed), label: 'RSS'),
-          BottomNavigationBarItem(icon: Icon(Icons.edit), label: 'Editor'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book),
+            label: 'Book'
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.rss_feed),
+            label: 'RSS'
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.edit),
+            label: 'Editor'
+          ),
         ],
         currentIndex: navigationShell.currentIndex,
         selectedItemColor: Colors.amber[800],
@@ -297,6 +305,22 @@ class ScaffoldWithNavBar extends StatelessWidget {
   }
 }
 
+// BottomNavigationBarItem buildCustomBottomNavigationBarItem({
+//   required String label,
+//   required Icon icon,
+//   int maxLines = 1,
+// }) {
+//   return BottomNavigationBarItem(
+//     icon: icon,
+//     label: null, // 置空默认标签
+//     // 使用 `RichText` 作为标签
+//     title: buildRichTextWithMaxLines(
+//       text: label,
+//       fontSize: 14.0,
+//       maxLines: maxLines,
+//     ),
+//   );
+// }
 
 
 
